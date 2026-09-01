@@ -1,0 +1,25 @@
+/* Tailwind CSS inngangspunkt for NAV-gjengen.
+   Play CDN lastes i index.html slik at Tailwind-klasser er tilgjengelige uten
+   en build-prosess i denne statiske demoen. Ved produksjonsbygg: erstatt CDN
+   med Tailwind CLI og bruk denne filen som inngangspunkt. */
+
+@layer utilities {
+  .motion-reveal { animation: nav-reveal .55s cubic-bezier(.2,.8,.2,1) both; }
+  .motion-delay-1 { animation-delay: .08s; }
+  .motion-delay-2 { animation-delay: .16s; }
+  .post-enter { animation: post-enter .38s cubic-bezier(.2,.8,.2,1) both; }
+}
+
+@keyframes nav-reveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes post-enter {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

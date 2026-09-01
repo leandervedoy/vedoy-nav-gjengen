@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="NAV-gjengen – et anonymt erfaringsforum om ytelser og rettigheter." />
+    <title>NAV-gjengen | Erfaringer om ytelser</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { nav: '#751d34' } } } };</script>
+    <link rel="stylesheet" href="tailwind.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#innlegg">Hopp til innlegg</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#" aria-label="NAV-gjengen, forsiden"><span class="brand-mark">NG</span><span>NAV-<span>gjengen</span></span></a>
+        <div class="header-actions"><button class="text-button" id="loginButton">Logg inn</button><button class="header-button" id="signupButton">Opprett konto</button></div>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="welcome motion-reveal" aria-labelledby="pageTitle"><p class="eyebrow">ERFARINGER · STØTTE · OVERSIKT</p><h1 id="pageTitle">Du skal ikke måtte finne ut av alt alene.</h1><p>Del erfaringer og få støtte fra andre som kjenner systemet.</p></section>
+      <section class="disclaimer motion-reveal motion-delay-1" aria-label="Viktig informasjon"><span aria-hidden="true">!</span><p><strong>Viktig:</strong> Innleggene bygger på brukernes egne erfaringer og er ikke juridiske råd. NAV fatter individuelle vedtak. <a href="https://www.nav.no" target="_blank" rel="noopener noreferrer">nav.no</a> er alltid den offisielle kilden.</p></section>
+
+      <div class="layout">
+        <aside class="sidebar motion-reveal motion-delay-2" aria-label="Filtrer innlegg">
+          <h2>Temaer</h2><p class="sidebar-note">Velg et tema for å se relevante innlegg.</p>
+          <nav id="categoryList" class="category-list" aria-label="Ytelseskategorier"></nav>
+        </aside>
+
+        <section class="content motion-reveal motion-delay-2" id="innlegg" aria-labelledby="feedTitle">
+          <div class="feed-heading"><div><h2 id="feedTitle">Samtaler</h2><p id="feedDescription" aria-live="polite">De nyeste erfaringene fra fellesskapet.</p></div><label class="sort-label">Vis<input id="sortSelect" type="hidden" /><select id="sortMenu" aria-label="Sorter innlegg"><option value="newest">Nyeste</option><option value="popular">Mest hjelpsomme</option></select></label></div>
+          <section class="composer" aria-labelledby="composerTitle"><div class="composer-title"><div class="avatar" aria-hidden="true">?</div><div><h2 id="composerTitle">Del anonymt med fellesskapet</h2><p>Logg inn med Vedøy Login for å skrive. Ikke del fødselsnummer, adresse, saksnummer eller annen sensitiv informasjon.</p></div></div>
+            <form id="postForm"><label for="postTitle">Overskrift</label><input id="postTitle" maxlength="110" placeholder="Hva handler innlegget om?" required /><label for="postContent">Innlegg</label><textarea id="postContent" rows="4" maxlength="1200" placeholder="Skriv spørsmålet eller erfaringen din her …" required></textarea><label class="anonymous-choice"><input id="postAnonymously" type="checkbox" checked /><span><strong>Vis meg som «Anonym bruker»</strong><small>Kontoen din er fortsatt knyttet til innlegget internt for sikkerhet og moderering.</small></span></label><aside class="vedi-notice" aria-labelledby="vediTitle"><span class="vedi-mark" aria-hidden="true">V</span><div><strong id="vediTitle">Vedi KI hjelper til med trygg moderering</strong><p>Før publisering analyseres overskrift og tekst for trusler, trakassering, diskriminering og personopplysninger. Vedi kan stoppe teksten eller sende den til manuell vurdering, og kan ta feil. Ikke del sensitive opplysninger. <a href="vilkar.html#vedi">Slik brukes Vedi</a>.</p></div></aside><p class="moderation-status" id="moderationStatus" aria-live="polite"></p><div class="composer-bottom"><label for="postCategory">Tema<select id="postCategory" required><option value="">Velg tema</option></select></label><button class="primary-button" id="publishButton" type="submit">Sjekk og publiser</button></div></form>
+          </section>
+          <div class="feed" id="feed" aria-live="polite"></div><p class="empty-state" id="emptyState" hidden>Ingen innlegg i dette temaet ennå.</p>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer"><div><strong>NAV-gjengen</strong><span>Et uavhengig erfaringsforum.</span></div><a href="vilkar.html">Vilkår og personvern</a></footer>
+
+    <dialog id="authDialog"><form id="authForm" class="dialog-card"><button class="close-button" type="button" id="closeAuth" aria-label="Lukk">×</button><p class="eyebrow">VEDØY LOGIN</p><h2>Logg inn for å delta</h2><p>Du kan lese anonymt. Med en Vedøy-konto velger du et offentlig brukernavn – aldri fullt navn i forumet.</p><label class="consent"><input id="termsConsent" type="checkbox" required /> <span>Jeg godtar <a href="vilkar.html" target="_blank" rel="noopener">vilkår og personvern</a>.</span></label><label class="consent"><input id="crossProjectConsent" type="checkbox" required /> <span>Jeg forstår at Vedøy-konto, påloggingsstatus og samtykkelogg brukes på tvers av Vedøy-prosjekter. Foruminnlegg deles ikke automatisk.</span></label><p class="auth-status" id="authStatus" aria-live="polite"></p><button class="primary-button" id="continueLogin" type="submit">Fortsett med Vedøy Login</button></form></dialog>
+    <template id="postTemplate"><article class="post-card"><div class="post-top"><span class="tag"></span><time></time></div><h3></h3><p class="post-content"></p><div class="post-actions"><button class="help-button" type="button"><span aria-hidden="true">♥</span> Hjalp meg <strong></strong></button><button class="comment-button" type="button"><span aria-hidden="true">◌</span> <strong></strong> kommentarer</button></div><section class="comments" hidden><form class="comment-form"><label>Kommenter anonymt<input maxlength="500" required placeholder="Skriv en støttende eller nyttig kommentar …" /></label><p class="comment-moderation-note">Kommentarer sikkerhetssjekkes også før publisering.</p><button type="submit">Send</button></form><div class="comment-list"></div></section></article></template>
+    <script src="vedoy-login-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

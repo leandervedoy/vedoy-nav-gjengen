@@ -1,0 +1,15 @@
+# Installerte avhengigheter og byggfiler
+node_modules/
+dist/
+
+# Lokale miljøvariabler og Vercel-metadata
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Editor- og operativsystemfiler
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
