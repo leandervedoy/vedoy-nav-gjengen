@@ -13,3 +13,5 @@ dist/
 Thumbs.db
 .vscode/
 *.log
+.migration-work/
+.pnpm-store/

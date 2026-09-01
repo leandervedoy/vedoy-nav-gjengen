@@ -37,6 +37,11 @@ alter table public.posts enable row level security;
 alter table public.comments enable row level security;
 alter table public.post_upvotes enable row level security;
 
+-- Nye Supabase-prosjekter eksponerer ikke nødvendigvis public-tabeller automatisk.
+grant select on public.profiles, public.posts, public.comments, public.post_upvotes to anon, authenticated;
+grant insert, update, delete on public.profiles, public.posts, public.comments, public.post_upvotes to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+
 create policy "Public profiles are readable" on public.profiles for select using (true);
 create policy "Users create own profile" on public.profiles for insert to authenticated with check ((select auth.uid()) = id);
 create policy "Users update own profile" on public.profiles for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
