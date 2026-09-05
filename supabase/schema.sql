@@ -32,6 +32,11 @@ create table if not exists public.post_upvotes (
   primary key (post_id, user_id)
 );
 
+create index if not exists posts_user_id_idx on public.posts(user_id);
+create index if not exists comments_post_id_idx on public.comments(post_id);
+create index if not exists comments_user_id_idx on public.comments(user_id);
+create index if not exists post_upvotes_user_id_idx on public.post_upvotes(user_id);
+
 alter table public.profiles enable row level security;
 alter table public.posts enable row level security;
 alter table public.comments enable row level security;

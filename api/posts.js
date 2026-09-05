@@ -19,7 +19,7 @@ module.exports = async (request, response) => {
   try {
     if (request.method === "GET") {
       const [postsResponse, commentsResponse, votesResponse] = await Promise.all([
-        supabase("posts?select=id,user_id,category,title,content,is_anonymous,created_at,profiles(username)&moderation_status=eq.approved&order=created_at.desc"),
+        supabase("posts?select=id,user_id,category,title,content,is_anonymous,created_at,profiles!posts_user_id_fkey(username)&moderation_status=eq.approved&order=created_at.desc"),
         supabase("comments?select=id,post_id,content,created_at,profiles(username)&order=created_at.asc"),
         supabase("post_upvotes?select=post_id"),
       ]);
