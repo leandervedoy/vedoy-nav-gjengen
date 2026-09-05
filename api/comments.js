@@ -8,7 +8,7 @@ module.exports = async (request, response) => {
   const content = String(request.body?.content || "").trim().slice(0, 500);
   if (!Number.isInteger(postId) || !content) return response.status(400).json({ error: "Kommentaren er ugyldig." });
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return response.status(503).json({ error: "Supabase er ikke konfigurert." });
   const upstream = await fetch(`${url}/rest/v1/comments`, {
     method: "POST", headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "return=representation" },

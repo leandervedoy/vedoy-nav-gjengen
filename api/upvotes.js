@@ -7,7 +7,7 @@ module.exports = async (request, response) => {
   const postId = Number(request.body?.postId);
   if (!Number.isInteger(postId)) return response.status(400).json({ error: "Innlegget er ugyldig." });
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return response.status(503).json({ error: "Supabase er ikke konfigurert." });
   const upstream = await fetch(`${url}/rest/v1/post_upvotes?on_conflict=post_id,user_id`, {
     method: "POST", headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "resolution=ignore-duplicates,return=representation" },
