@@ -9,22 +9,33 @@ module.exports = async (request, response) => {
     if (!code || !state || state !== cookies.nav_gjengen_state || !cookies.nav_gjengen_pkce) {
       return response.redirect(302, "/?auth_error=state");
     }
-    const loginUrl = new URL(process.env.VEDOY_LOGIN_URL);
+    const issuer = process.env.VEDOY_OAUTH_ISSUER || "https://niedmgyyougvgiiuwcvw.supabase.co/auth/v1";
+    const clientId = process.env.VEDOY_OAUTH_CLIENT_ID;
     const appUrl = process.env.APP_URL || "https://nav-gjengen.vercel.app";
-    const tokenResponse = await fetch(new URL("/api/vedoy-login/token", loginUrl.origin), {
+    if (!clientId) return response.redirect(302, "/?auth_error=config");
+
+    const tokenResponse = await fetch(`${issuer.replace(/\/$/, "")}/oauth/token`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
         code,
-        codeVerifier: cookies.nav_gjengen_pkce,
-        clientId: "nav-gjengen",
-        redirectUri: `${appUrl}/api/auth-callback`,
+        client_id: clientId,
+        redirect_uri: `${appUrl}/api/auth-callback`,
+        code_verifier: cookies.nav_gjengen_pkce,
       }),
     });
-    const result = await tokenResponse.json();
-    if (!tokenResponse.ok || !result.user?.id) return response.redirect(302, "/?auth_error=exchange");
+    const tokens = await tokenResponse.json();
+    if (!tokenResponse.ok || !tokens.access_token) return response.redirect(302, "/?auth_error=exchange");
+
+    const userResponse = await fetch(`${issuer.replace(/\/$/, "")}/oauth/userinfo`, {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    });
+    const profile = await userResponse.json();
+    if (!userResponse.ok || !profile.sub) return response.redirect(302, "/?auth_error=identity");
+
     response.setHeader("Set-Cookie", [
-      sessionCookie(result.user),
+      sessionCookie({ id: profile.sub, displayName: profile.preferred_username || profile.name || null }),
       "nav_gjengen_pkce=; Path=/api/auth-callback; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
       "nav_gjengen_state=; Path=/api/auth-callback; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
     ]);

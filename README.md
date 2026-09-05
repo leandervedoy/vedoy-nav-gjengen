@@ -11,9 +11,9 @@ En responsiv frontend-demo for et anonymt forum om ytelser og rettigheter. Åpne
 
 All data lever kun i nettleserens minne. Innlogging er en visuell demo; den gir ikke tilgang til et ekte brukerområde.
 
-## Vedøy Login og samtykke
+## Vedøy-konto og samtykke
 
-Kopier `vedoy-login-config.example.js` til `vedoy-login-config.js` ved deploy og last den **før** `app.js`. `VEDOY_LOGIN_URL` må peke til Vedøy Logins serverkontrollerte startendepunkt. Endepunktet skal bare akseptere tillatte `next`-adresser, og callbacken skal kontrollere brukerens Supabase-token på serveren. Ikke send samtykke som autorisasjon fra nettleseren; lagre samtykkeversjon, tidspunkt og konto-ID server-side i `public.vedoy_login_consents` med RLS.
+NAV-gjengen bruker Supabase-prosjektet **Vedoy** som OAuth 2.1-leverandør. Sett `VEDOY_OAUTH_ISSUER`, `VEDOY_OAUTH_CLIENT_ID`, `APP_URL` og en tilfeldig `NAV_GJENGEN_SESSION_SECRET` på serveren. Flyten bruker Authorization Code med PKCE, og callbacken henter identiteten fra Supabase sitt UserInfo-endepunkt. Passord og tilgangstoken lagres aldri i NAV-gjengens nettleserkode eller sesjonscookie.
 
 Vilkårene i `vilkar.html` er et utkast. Fyll ut juridisk virksomhetsnavn, kontaktadresse, databehandlere og lagringstider, og få teksten kvalitetssikret før lansering.
 
