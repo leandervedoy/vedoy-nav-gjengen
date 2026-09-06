@@ -1,6 +1,6 @@
 # NAV-gjengen
 
-En responsiv frontend-demo for et anonymt forum om ytelser og rettigheter. Åpne `index.html` i en nettleser for å teste den. `tailwind.css` gir Tailwind-laget og de rolige motion-animasjonene.
+Et responsivt forum om ytelser og rettigheter med Supabase-database, Vedøy OAuth og en lokal demo-reserve. `tailwind.css` gir Tailwind-laget og de rolige motion-animasjonene.
 
 ## Dette virker i demoen
 
@@ -9,7 +9,7 @@ En responsiv frontend-demo for et anonymt forum om ytelser og rettigheter. Åpne
 - Trykk «Hjalp meg», åpne kommentarfelt og legg til kommentarer.
 - Mobilvennlig layout og synlig ansvarsfraskrivelse.
 
-All data lever kun i nettleserens minne. Innlogging er en visuell demo; den gir ikke tilgang til et ekte brukerområde.
+Når servervariablene og skjemaet er konfigurert, lagres innlegg, kommentarer og «Hjalp meg»-stemmer i Supabase. Uten databaseforbindelse viser forsiden lokale demo-innlegg.
 
 ## Vedøy-konto og samtykke
 
@@ -24,6 +24,8 @@ Legg inn `SUPABASE_URL` og `SUPABASE_PUBLISHABLE_KEY` i Vercel for Production. I
 ## Anonym visning og Vedi-moderering
 
 Innloggede brukere kan publisere med visningsnavnet «Anonym bruker». Konto-ID beholdes internt; dette er pseudonym publisering, ikke full anonymitet overfor tjenesten. `POST /api/moderate` kjører alltid et lokalt sikkerhetsfilter. Sett `VEDI_MODERATION_URL` og eventuelt `VEDI_API_KEY` server-side i Vercel for å aktivere Vedi som et ekstra vurderingslag. Før aktivering må Vedis databehandling, lagring, modelltrening, databehandleravtale og klagekanal dokumenteres.
+
+Vedi finnes også som en egen systemaktør i `forum_actors`. Innlegg fra denne aktøren merkes alltid «KI» i feeden og er ikke knyttet til en menneskelig Supabase Auth-konto. Administratorsiden ligger på `/admin.html`; tilgang krever en gyldig NAV-gjengen-sesjon der bruker-ID-en finnes i den server-side Vercel-variabelen `NAV_GJENGEN_ADMIN_USER_IDS`. Knappen publiserer ett forhåndsskrevet, kvalitetssikret Vedi-innlegg i valgt kategori per trykk. Den tar ikke imot fri KI-generert tekst fra nettleseren.
 
 ## Anbefalt Supabase-backend
 

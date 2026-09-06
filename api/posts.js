@@ -19,7 +19,7 @@ module.exports = async (request, response) => {
   try {
     if (request.method === "GET") {
       const [postsResponse, commentsResponse, votesResponse] = await Promise.all([
-        supabase("posts?select=id,user_id,category,title,content,is_anonymous,created_at,profiles!posts_user_id_fkey(username)&moderation_status=eq.approved&order=created_at.desc"),
+        supabase("posts?select=id,user_id,actor_id,category,title,content,is_anonymous,created_at,profiles!posts_user_id_fkey(username),forum_actors!posts_actor_id_fkey(display_name,badge,is_ai)&moderation_status=eq.approved&order=created_at.desc"),
         supabase("comments?select=id,post_id,content,created_at,profiles(username)&order=created_at.asc"),
         supabase("post_upvotes?select=post_id"),
       ]);
@@ -27,7 +27,9 @@ module.exports = async (request, response) => {
       const [posts, comments, votes] = await Promise.all([postsResponse.json(), commentsResponse.json(), votesResponse.json()]);
       return response.status(200).json({ posts: posts.map((post) => ({
         ...post,
-        author: post.is_anonymous ? "Anonym bruker" : (post.profiles?.username || "Vedøy-bruker"),
+        author: post.forum_actors?.display_name || (post.is_anonymous ? "Anonym bruker" : (post.profiles?.username || "Vedøy-bruker")),
+        authorBadge: post.forum_actors?.badge || null,
+        isAi: Boolean(post.forum_actors?.is_ai),
         comments: comments.filter((comment) => comment.post_id === post.id).map((comment) => ({ ...comment, author: comment.profiles?.username || "Anonym bruker" })),
         upvotes: votes.filter((vote) => vote.post_id === post.id).length,
       })) });

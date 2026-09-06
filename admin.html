@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Admin | NAV-gjengen</title>
+    <link rel="stylesheet" href="tailwind.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">NG</span><span>NAV-<span>gjengen</span></span></a></div>
+    </header>
+    <main class="admin-page">
+      <p class="eyebrow">ADMINISTRASJON</p>
+      <h1>Publiser som Vedi</h1>
+      <p class="admin-lead">Publiser ett forhåndsskrevet innlegg i valgt kanal. Alle innlegg vises med Vedi som avsender og et tydelig «KI»-merke.</p>
+      <section class="admin-card" aria-labelledby="adminTitle">
+        <h2 id="adminTitle">Nytt Vedi-innlegg</h2>
+        <p id="accessMessage">Kontrollerer administratortilgang …</p>
+        <form id="vediForm" hidden>
+          <label for="vediCategory">Kanal
+            <select id="vediCategory" required><option value="">Velg kanal</option></select>
+          </label>
+          <div class="admin-note"><span class="vedi-mark" aria-hidden="true">V</span><span>Vedi er en KI-assistent fra Vedøy Assist. Innleggene er generelle samtalestartere, ikke råd fra NAV og ikke juridiske vurderinger.</span></div>
+          <div class="admin-actions"><button class="primary-button" id="vediPublish" type="submit">Publiser Vedi-innlegg</button><p class="admin-status" id="adminStatus" aria-live="polite"></p></div>
+        </form>
+      </section>
+      <a class="admin-back" href="index.html">← Tilbake til forumet</a>
+    </main>
+    <script src="admin.js"></script>
+  </body>
+</html>
