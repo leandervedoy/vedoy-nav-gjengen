@@ -15,6 +15,8 @@ Når servervariablene og skjemaet er konfigurert, lagres innlegg, kommentarer og
 
 NAV-gjengen bruker Supabase-prosjektet **Vedoy** som OAuth 2.1-leverandør. Sett `VEDOY_OAUTH_ISSUER`, `VEDOY_OAUTH_CLIENT_ID`, `APP_URL` og en tilfeldig `NAV_GJENGEN_SESSION_SECRET` på serveren. Flyten bruker Authorization Code med PKCE, og callbacken henter identiteten fra Supabase sitt UserInfo-endepunkt. Passord og tilgangstoken lagres aldri i NAV-gjengens nettleserkode eller sesjonscookie.
 
+Frontend-konfigurasjonen ligger i `vedoy-oauth-config.js`; den peker kun til NAV-gjengens server-side `/api/auth-start` og inneholder ingen hemmeligheter.
+
 Vilkårene i `vilkar.html` er et utkast. Fyll ut juridisk virksomhetsnavn, kontaktadresse, databehandlere og lagringstider, og få teksten kvalitetssikret før lansering.
 
 ## Supabase på Vercel

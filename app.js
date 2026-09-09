@@ -239,7 +239,7 @@ $("#closeAdminPost").addEventListener("click", () => $("#postAdminDialog").close
 $("#sortMenu").addEventListener("change", (event) => { sortMode = event.target.value; render(); });
 $("#loginButton").addEventListener("click", () => { if (!isAuthenticated) $("#authDialog").showModal(); });
 $("#closeAuth").addEventListener("click", () => $("#authDialog").close());
-$("#authForm").addEventListener("submit", (event) => { event.preventDefault(); window.location.assign("/api/auth-start"); });
+$("#authForm").addEventListener("submit", (event) => { event.preventDefault(); window.location.assign(window.VEDOY_OAUTH_URL || "/api/auth-start"); });
 $("#signupButton").addEventListener("click", async () => {
   if (!isAuthenticated) { $("#authDialog").showModal(); return; }
   await fetch("/api/logout", { method: "POST" });
