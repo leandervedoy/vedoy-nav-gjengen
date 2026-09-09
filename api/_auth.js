@@ -33,17 +33,6 @@ function currentUser(request) {
   try { return verify(parseCookies(request.headers.cookie)[COOKIE_NAME]); } catch { return null; }
 }
 
-// Administratorer styres kun av en servervariabel i Vercel. Ingen klient kan
-// gjøre seg selv til administrator ved å endre nettleserkode eller en request.
-function isAdmin(user) {
-  if (!user?.id) return false;
-  const allowedIds = String(process.env.NAV_GJENGEN_ADMIN_USER_IDS || "")
-    .split(",")
-    .map((id) => id.trim().toLowerCase())
-    .filter(Boolean);
-  return allowedIds.includes(String(user.id).toLowerCase());
-}
-
 function sessionCookie(user) {
   const now = Math.floor(Date.now() / 1000);
   const token = sign({ id: user.id, displayName: user.displayName || null, iat: now, exp: now + 3600 });
@@ -54,4 +43,4 @@ function clearSessionCookie() {
   return `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
 }
 
-module.exports = { clearSessionCookie, currentUser, isAdmin, parseCookies, sessionCookie };
+module.exports = { clearSessionCookie, currentUser, parseCookies, sessionCookie };

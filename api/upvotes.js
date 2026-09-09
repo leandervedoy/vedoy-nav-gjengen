@@ -9,6 +9,8 @@ module.exports = async (request, response) => {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return response.status(503).json({ error: "Supabase er ikke konfigurert." });
+  const postResponse = await fetch(`${url}/rest/v1/posts?id=eq.${postId}&moderation_status=eq.approved&select=id&limit=1`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+  if (!postResponse.ok || (await postResponse.json()).length !== 1) return response.status(404).json({ error: "Innlegget er ikke tilgjengelig." });
   const upstream = await fetch(`${url}/rest/v1/post_upvotes?on_conflict=post_id,user_id`, {
     method: "POST", headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "resolution=ignore-duplicates,return=representation" },
     body: JSON.stringify({ post_id: postId, user_id: user.id }),

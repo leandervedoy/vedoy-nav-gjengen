@@ -1,4 +1,5 @@
-const { currentUser, isAdmin } = require("./_auth");
+const { currentUser } = require("./_auth");
+const { hasSameOrigin, isNavGjengenAdmin } = require("./_admin");
 
 const categories = ["AAP", "Uføretrygd", "Sykepenger", "Dagpenger", "Sosialhjelp", "Tilleggsstønader", "Bostøtte"];
 
@@ -71,7 +72,8 @@ module.exports = async (request, response) => {
   try {
     const user = currentUser(request);
     if (!user) return response.status(401).json({ error: "Du må logge inn." });
-    if (!isAdmin(user)) return response.status(403).json({ error: "Du har ikke administratortilgang." });
+    if (!hasSameOrigin(request)) return response.status(403).json({ error: "Ugyldig forespørsel." });
+    if (!(await isNavGjengenAdmin(user))) return response.status(403).json({ error: "Du har ikke administratortilgang." });
 
     const vedi = await getVedi();
     if (request.method === "GET") {

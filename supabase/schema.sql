@@ -5,6 +5,14 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+-- Kun NAV-gjengen bruker denne rolletabellen. Vanlige Supabase-klienter har
+-- ingen rettigheter; bare NAV-gjengens server med hemmelig nøkkel leser den.
+create table if not exists public.nav_gjengen_roles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  role text not null check (role in ('admin')),
+  created_at timestamptz not null default now()
+);
+
 -- Systemaktører kan publisere uten å få en menneskelig innloggingskonto.
 -- `badge` gjør det tydelig i grensesnittet at Vedi er kunstig intelligens.
 create table if not exists public.forum_actors (
@@ -61,6 +69,7 @@ create index if not exists comments_user_id_idx on public.comments(user_id);
 create index if not exists post_upvotes_user_id_idx on public.post_upvotes(user_id);
 
 alter table public.profiles enable row level security;
+alter table public.nav_gjengen_roles enable row level security;
 alter table public.forum_actors enable row level security;
 alter table public.posts enable row level security;
 alter table public.comments enable row level security;
@@ -70,20 +79,27 @@ alter table public.post_upvotes enable row level security;
 grant select on public.profiles, public.forum_actors, public.posts, public.comments, public.post_upvotes to anon, authenticated;
 grant insert, update, delete on public.profiles, public.posts, public.comments, public.post_upvotes to authenticated;
 grant usage, select on all sequences in schema public to authenticated;
+revoke all on public.nav_gjengen_roles from anon, authenticated;
+grant select on public.nav_gjengen_roles to service_role;
 
 create policy "Public profiles are readable" on public.profiles for select using (true);
+create policy "NAV-gjengen roles deny client access" on public.nav_gjengen_roles
+  as restrictive for all to anon, authenticated using (false) with check (false);
 create policy "Public forum actors are readable" on public.forum_actors for select using (true);
 create policy "Users create own profile" on public.profiles for insert to authenticated with check ((select auth.uid()) = id);
 create policy "Users update own profile" on public.profiles for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
-create policy "Posts are readable" on public.posts for select using (true);
+create policy "Approved or owned posts are readable" on public.posts for select to anon, authenticated
+  using (moderation_status = 'approved' or (select auth.uid()) = user_id);
 create policy "Users create own posts" on public.posts for insert to authenticated with check ((select auth.uid()) = user_id);
 create policy "Users update own posts" on public.posts for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "Users delete own posts" on public.posts for delete to authenticated using ((select auth.uid()) = user_id);
-create policy "Comments are readable" on public.comments for select using (true);
+create policy "Comments on approved posts are readable" on public.comments for select to anon, authenticated
+  using (exists (select 1 from public.posts where posts.id = comments.post_id and posts.moderation_status = 'approved'));
 create policy "Users create own comments" on public.comments for insert to authenticated with check ((select auth.uid()) = user_id);
 create policy "Users update own comments" on public.comments for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "Users delete own comments" on public.comments for delete to authenticated using ((select auth.uid()) = user_id);
-create policy "Upvotes are readable" on public.post_upvotes for select using (true);
+create policy "Upvotes on approved posts are readable" on public.post_upvotes for select to anon, authenticated
+  using (exists (select 1 from public.posts where posts.id = post_upvotes.post_id and posts.moderation_status = 'approved'));
 create policy "Users create own upvote" on public.post_upvotes for insert to authenticated with check ((select auth.uid()) = user_id);
 create policy "Users remove own upvote" on public.post_upvotes for delete to authenticated using ((select auth.uid()) = user_id);
 

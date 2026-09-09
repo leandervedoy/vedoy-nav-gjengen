@@ -25,7 +25,13 @@ Legg inn `SUPABASE_URL` og `SUPABASE_PUBLISHABLE_KEY` i Vercel for Production. I
 
 Innloggede brukere kan publisere med visningsnavnet «Anonym bruker». Konto-ID beholdes internt; dette er pseudonym publisering, ikke full anonymitet overfor tjenesten. `POST /api/moderate` kjører alltid et lokalt sikkerhetsfilter. Sett `VEDI_MODERATION_URL` og eventuelt `VEDI_API_KEY` server-side i Vercel for å aktivere Vedi som et ekstra vurderingslag. Før aktivering må Vedis databehandling, lagring, modelltrening, databehandleravtale og klagekanal dokumenteres.
 
-Vedi finnes også som en egen systemaktør i `forum_actors`. Innlegg fra denne aktøren merkes alltid «KI» i feeden og er ikke knyttet til en menneskelig Supabase Auth-konto. Administratorsiden ligger på `/admin.html`; tilgang krever en gyldig NAV-gjengen-sesjon der bruker-ID-en finnes i den server-side Vercel-variabelen `NAV_GJENGEN_ADMIN_USER_IDS`. Knappen publiserer ett forhåndsskrevet, kvalitetssikret Vedi-innlegg i valgt kategori per trykk. Den tar ikke imot fri KI-generert tekst fra nettleseren.
+Vedi finnes også som en egen systemaktør i `forum_actors`. Innlegg fra denne aktøren merkes alltid «KI» i feeden og er ikke knyttet til en menneskelig Supabase Auth-konto. Administratorsiden ligger på `/admin.html`. Knappen publiserer ett forhåndsskrevet, kvalitetssikret Vedi-innlegg i valgt kategori per trykk. Den tar ikke imot fri KI-generert tekst fra nettleseren.
+
+## NAV-gjengen-administrator
+
+Administratorrettigheter ligger bare i `public.nav_gjengen_roles`. Tabellen er navngitt for denne appen, har RLS aktivert og nekter all tilgang for `anon` og `authenticated`; bare NAV-gjengens serverkode med Supabase secret/service-role-nøkkel leser den. Andre Vedøy-apper skal ikke bruke tabellen som sin rollemodell. Merk at alle apper som deler samme Supabase secret/service-role-nøkkel teknisk har databaseomfattende servertilgang. Full kryptografisk isolasjon krever en egen Supabase-instans eller egne begrensede databaselegitimasjoner per app.
+
+Når en innlogget bruker har rollen `admin`, vises adminmodus på forsiden. Der kan administratoren redigere, skjule, publisere på nytt eller slette innlegg. Sletting krever en ekstra bekreftelse i nettleseren. Skjulte innlegg, tilhørende kommentarer og stemmer er sperret fra den offentlige Data API-en med RLS.
 
 ## Anbefalt Supabase-backend
 

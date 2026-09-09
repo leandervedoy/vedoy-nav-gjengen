@@ -47,15 +47,24 @@ async function askVedi(text) {
   } catch { return null; } finally { clearTimeout(timeout); }
 }
 
-module.exports = async (request, response) => {
-  if (request.method !== "POST") return response.status(405).json({ error: "Metoden støttes ikke." });
-  const title = normalise(request.body?.title).slice(0, 110);
-  const content = normalise(request.body?.content).slice(0, 1200);
-  if (!title || !content) return response.status(400).json({ error: "Overskrift og innlegg er påkrevd." });
+async function moderateContent(rawTitle, rawContent) {
+  const title = normalise(rawTitle).slice(0, 110);
+  const content = normalise(rawContent).slice(0, 1200);
+  if (!title || !content) return { decision: "block", reason: "Overskrift og innlegg er påkrevd.", source: "safety-filter", vediUsed: false };
   const text = `${title}\n${content}`;
   const local = localModeration(text);
-  if (local.decision === "block") return response.status(200).json({ ...local, vediUsed: false });
+  if (local.decision === "block") return { ...local, vediUsed: false };
   const vedi = await askVedi(text);
   const result = vedi && (vedi.decision === "block" || (vedi.decision === "review" && local.decision === "allow")) ? vedi : local;
-  return response.status(200).json({ ...result, vediUsed: Boolean(vedi) });
-};
+  return { ...result, vediUsed: Boolean(vedi) };
+}
+
+async function handler(request, response) {
+  if (request.method !== "POST") return response.status(405).json({ error: "Metoden støttes ikke." });
+  const result = await moderateContent(request.body?.title, request.body?.content);
+  if (!request.body?.title || !request.body?.content) return response.status(400).json({ error: result.reason });
+  return response.status(200).json(result);
+}
+
+module.exports = handler;
+module.exports.moderateContent = moderateContent;

@@ -1,4 +1,6 @@
 const { currentUser } = require("./_auth");
+const { isNavGjengenAdmin } = require("./_admin");
+const { moderateContent } = require("./moderate");
 
 const config = (admin = false) => ({
   url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -18,10 +20,16 @@ async function supabase(path, { admin = false, method = "GET", body, prefer = "r
 module.exports = async (request, response) => {
   try {
     if (request.method === "GET") {
+      const user = currentUser(request);
+      let admin = false;
+      if (user) {
+        try { admin = await isNavGjengenAdmin(user); } catch { admin = false; }
+      }
+      const moderationFilter = admin ? "" : "&moderation_status=eq.approved";
       const [postsResponse, commentsResponse, votesResponse] = await Promise.all([
-        supabase("posts?select=id,user_id,actor_id,category,title,content,is_anonymous,created_at,profiles!posts_user_id_fkey(username),forum_actors!posts_actor_id_fkey(display_name,badge,is_ai)&moderation_status=eq.approved&order=created_at.desc"),
-        supabase("comments?select=id,post_id,content,created_at,profiles(username)&order=created_at.asc"),
-        supabase("post_upvotes?select=post_id"),
+        supabase(`posts?select=id,user_id,actor_id,category,title,content,is_anonymous,moderation_status,created_at,profiles!posts_user_id_fkey(username),forum_actors!posts_actor_id_fkey(display_name,badge,is_ai)&order=created_at.desc${moderationFilter}`, { admin }),
+        supabase("comments?select=id,post_id,content,created_at,profiles(username)&order=created_at.asc", { admin }),
+        supabase("post_upvotes?select=post_id", { admin }),
       ]);
       if (![postsResponse, commentsResponse, votesResponse].every((item) => item.ok)) throw new Error("Kunne ikke hente forumdata.");
       const [posts, comments, votes] = await Promise.all([postsResponse.json(), commentsResponse.json(), votesResponse.json()]);
@@ -30,6 +38,7 @@ module.exports = async (request, response) => {
         author: post.forum_actors?.display_name || (post.is_anonymous ? "Anonym bruker" : (post.profiles?.username || "Vedøy-bruker")),
         authorBadge: post.forum_actors?.badge || null,
         isAi: Boolean(post.forum_actors?.is_ai),
+        moderationStatus: post.moderation_status,
         comments: comments.filter((comment) => comment.post_id === post.id).map((comment) => ({ ...comment, author: comment.profiles?.username || "Anonym bruker" })),
         upvotes: votes.filter((vote) => vote.post_id === post.id).length,
       })) });
@@ -43,10 +52,12 @@ module.exports = async (request, response) => {
       if (!allowed.includes(category) || String(title || "").trim().length < 3 || String(content || "").trim().length < 3) {
         return response.status(400).json({ error: "Kontroller tema, overskrift og tekst." });
       }
+      const moderation = await moderateContent(title, content);
+      if (moderation.decision !== "allow") return response.status(422).json({ error: moderation.reason });
       await supabase("profiles?on_conflict=id", { admin: true, method: "POST", prefer: "resolution=merge-duplicates,return=minimal", body: { id: user.id, username: user.displayName || `bruker-${user.id.slice(0, 8)}` } });
       const created = await supabase("posts", { admin: true, method: "POST", body: {
         user_id: user.id, category, title: String(title).trim().slice(0, 110), content: String(content).trim().slice(0, 1200),
-        is_anonymous: Boolean(isAnonymous), moderation_status: "approved", moderation_source: "nav-gjengen-api",
+        is_anonymous: Boolean(isAnonymous), moderation_status: "approved", moderation_source: moderation.source,
       } });
       if (!created.ok) throw new Error("Innlegget kunne ikke lagres.");
       return response.status(201).json({ post: (await created.json())[0] });
